@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ImageModal from "./ImageModal";
-import { deleteImage, fetchHighlightedImage } from "../api"; // api.ts를 사용할 경우
+
 
 export interface SearchResultType {
   image_path: string;

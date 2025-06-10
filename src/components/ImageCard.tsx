@@ -1,5 +1,5 @@
 
-import { deleteImage } from "./api";
+import { deleteImage } from "../api";
 
 interface ImageCardProps {
   filename: string;
