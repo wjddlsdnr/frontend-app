@@ -2,7 +2,8 @@ import { useState } from "react";
 import UploadForm from "./components/UploadForm";
 import SearchForm from "./components/SearchForm";
 import SearchResultList from "./components/SearchResultList";
-import ImageGallery from "./components/ImageGallery"; // 추가!
+import ImageGallery from "./components/ImageGallery";
+import AuthForm from "./components/AuthForm";
 
 interface Match {
   highlighted: string;
@@ -16,17 +17,28 @@ interface SearchResultGrouped {
 
 function App() {
   const [results, setResults] = useState<SearchResultGrouped[]>([]);
-  const [showGallery, setShowGallery] = useState(false); // 갤러리 보기 상태 추가
+  const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access_token"));
+  const [showGallery, setShowGallery] = useState(false);
 
   const handleSearchResults = (data: any) => {
     setResults(Array.isArray(data) ? data : []);
   };
 
+  // 로그아웃 함수
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    setLoggedIn(false);
+    setShowGallery(false);
+  };
+
+  // 이미지 삭제 시 토큰 포함
   const handleDelete = async (filename: string) => {
+    const token = localStorage.getItem("access_token") || "";
     const res = await fetch(
-      `${import.meta.env.VITE_API_BASE}/delete_image/${filename}`, // 배포 주소 반영
+      `${import.meta.env.VITE_API_BASE}/delete_image/${filename}`,
       {
         method: "DELETE",
+        headers: { "token": token },
       }
     );
     if (res.ok) {
@@ -35,6 +47,15 @@ function App() {
       );
     }
   };
+
+  // 로그인 안 했으면 AuthForm만 노출
+  if (!loggedIn) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-yellow-100 via-blue-50 to-white">
+        <AuthForm onLogin={() => setLoggedIn(true)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-blue-50 to-white pb-12">
@@ -60,10 +81,15 @@ function App() {
             >
               {showGallery ? "홈으로" : "내 사진 보기"}
             </button>
+            <button
+              className="ml-4 text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </button>
           </nav>
         </div>
       </header>
-      {/* 소개 Hero Section */}
       {!showGallery && (
         <section className="max-w-4xl mx-auto text-center mb-8 px-4">
           <h2 className="text-3xl font-extrabold text-blue-800 mb-2">
@@ -76,7 +102,6 @@ function App() {
           </p>
         </section>
       )}
-      {/* 메인 영역 */}
       <main className="max-w-4xl mx-auto px-4">
         {showGallery ? (
           <ImageGallery />

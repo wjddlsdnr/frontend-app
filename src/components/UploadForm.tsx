@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { uploadImage } from "../api"; // import
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 const UploadForm = () => {
   const [uploading, setUploading] = useState(false);
@@ -10,8 +11,19 @@ const UploadForm = () => {
     if (!fileInputRef.current?.files?.length) return;
     setUploading(true);
 
+    const formData = new FormData();
+    formData.append("file", fileInputRef.current.files[0]);
+
+    const token = localStorage.getItem("access_token");
+
     try {
-      const res = await uploadImage(fileInputRef.current.files[0]); // 변경!
+      const res = await fetch(API_BASE + "/upload/", {
+        method: "POST",
+        headers: {
+          "token": token || "",
+        },
+        body: formData,
+      });
       if (res.ok) {
         alert("✅ 업로드 성공! 검색에서 확인해보세요.");
         fileInputRef.current.value = "";
