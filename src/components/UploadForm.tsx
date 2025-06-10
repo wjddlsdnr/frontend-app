@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { uploadImage } from "../api"; // import
+// import { uploadImage } from "../api";  // 불필요하므로 제거!
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 const UploadForm = () => {
@@ -36,9 +36,6 @@ const UploadForm = () => {
       setUploading(false);
     }
   };
-
-
-
 
   return (
     <form onSubmit={handleUpload} className="flex flex-col items-center gap-2">
