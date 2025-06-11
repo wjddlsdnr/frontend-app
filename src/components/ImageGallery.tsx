@@ -1,30 +1,35 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { deleteImage, fetchMyImages } from "../api"; // api 함수 참고
 
-interface ImageList {
-  images: string[];
-}
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-
-const ImageGallery: React.FC = () => {
+const ImageGallery = () => {
   const [images, setImages] = useState<string[]>([]);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    fetch(`${API_BASE}/images/`)
-      .then((res) => res.json())
-      .then((data: ImageList) => setImages(data.images));
+    fetchMyImages(token ?? undefined).then((res) => setImages(res.images || []));
   }, []);
 
+  const handleDelete = async (imagePath: string) => {
+    if (!window.confirm("정말 삭제할까요?")) return;
+    const filename = imagePath.split("/").pop()!;
+    const res = await deleteImage(filename, token ?? undefined);
+    if (res.ok) setImages((prev) => prev.filter((i) => i !== imagePath));
+    else alert("삭제 실패");
+  };
+
   return (
-    <div>
-      <h2 className="text-lg font-bold mb-4">내가 올린 사진들</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {images.map((img, i) => (
-          <div key={i} className="border rounded-lg overflow-hidden shadow">
-            <img src={`${API_BASE}/${img}`} alt={`업로드이미지${i}`} className="w-full h-40 object-cover" />
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {images.map((img) => (
+        <div key={img} className="relative group">
+          <img src={import.meta.env.VITE_API_BASE + "/" + img} alt="" className="rounded-xl shadow" />
+          <button
+            onClick={() => handleDelete(img)}
+            className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded hidden group-hover:block"
+          >
+            삭제
+          </button>
+        </div>
+      ))}
     </div>
   );
 };
