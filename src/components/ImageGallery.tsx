@@ -1,30 +1,37 @@
 import { useEffect, useState } from "react";
-import { deleteImage, fetchMyImages } from "../api"; // api 함수 참고
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 const ImageGallery = () => {
   const [images, setImages] = useState<string[]>([]);
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    fetchMyImages(token ?? undefined).then((res) => setImages(res.images || []));
+    fetch(`${API_BASE}/my_images/`, {
+      headers: { token: token || "" }
+    })
+      .then(res => res.json())
+      .then(data => setImages(data.images || []));
   }, []);
 
-  const handleDelete = async (imagePath: string) => {
-    if (!window.confirm("정말 삭제할까요?")) return;
-    const filename = imagePath.split("/").pop()!;
-    const res = await deleteImage(filename, token ?? undefined);
-    if (res.ok) setImages((prev) => prev.filter((i) => i !== imagePath));
-    else alert("삭제 실패");
+  const handleDelete = async (img: string) => {
+    const filename = img.split("/").pop();
+    if (!filename || !window.confirm("정말 삭제할까요?")) return;
+    const res = await fetch(`${API_BASE}/delete_image/${filename}`, {
+      method: "DELETE",
+      headers: { token: token || "" }
+    });
+    if (res.ok) setImages(images.filter(i => i !== img));
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {images.map((img) => (
-        <div key={img} className="relative group">
-          <img src={import.meta.env.VITE_API_BASE + "/" + img} alt="" className="rounded-xl shadow" />
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-white/70 rounded-2xl p-8 shadow-lg">
+      {images.length === 0 && <div className="col-span-3 text-gray-400 py-8">아직 저장된 이미지가 없습니다.</div>}
+      {images.map(img => (
+        <div key={img} className="flex flex-col items-center p-2">
+          <img src={API_BASE + "/" + img} className="rounded-xl border-2 border-orange-100 shadow mb-3 w-48 h-32 object-cover" />
           <button
             onClick={() => handleDelete(img)}
-            className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded hidden group-hover:block"
+            className="mt-2 px-4 py-1 bg-red-400 hover:bg-red-500 text-white rounded-full shadow font-bold"
           >
             삭제
           </button>
