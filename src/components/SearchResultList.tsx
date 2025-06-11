@@ -37,7 +37,7 @@ const SearchResultList: React.FC<Props> = ({ results, onDelete }) => {
           >
             {/* 이미지 (오른쪽) */}
             <img
-              src={import.meta.env.VITE_API_BASE + "/" + result.image_path}
+              src={`${import.meta.env.VITE_API_BASE}/${result.image_path.replace(/^\/+/, "")}`}
               alt="검색 결과"
               className="w-72 h-44 object-contain rounded-2xl border-2 border-orange-200 shadow-md cursor-pointer"
               onClick={async () => {
@@ -46,7 +46,9 @@ const SearchResultList: React.FC<Props> = ({ results, onDelete }) => {
                   const res = await fetchHighlightedImage(result.image_path, keyword);
                   setModalImageSrc(URL.createObjectURL(res));
                 } catch {
-                  setModalImageSrc(import.meta.env.VITE_API_BASE + "/" + result.image_path);
+                  setModalImageSrc(
+                    `${import.meta.env.VITE_API_BASE}/${result.image_path.replace(/^\/+/, "")}`
+                  );              
                 }
               }}
             />
