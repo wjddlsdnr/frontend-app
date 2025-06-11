@@ -51,6 +51,16 @@ function App() {
             >
               {showGallery ? "홈으로" : "내 사진 보기"}
             </button>
+            {/* 👇 여기 추가 */}
+            <button
+              onClick={() => {
+                localStorage.removeItem("access_token");
+                setLoggedIn(false);
+              }}
+              className="ml-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-full px-4 py-1 font-medium shadow transition"
+            >
+              로그아웃
+            </button>
           </nav>
         </div>
       </header>
