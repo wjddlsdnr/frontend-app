@@ -20,20 +20,11 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access_token"));
   const [showGallery, setShowGallery] = useState(false);
 
-  // 이미지 삭제 핸들러 (onDelete용)
-  const handleDelete = async (filename: string) => {
-    await fetch(`${import.meta.env.VITE_API_BASE}/delete_image/${filename}`, {
-      method: "DELETE",
-      headers: {
-        token: localStorage.getItem("access_token") || "",
-      },
-    });
-    setResults(prev =>
-      prev.filter(item => !item.image_path.includes(filename))
-    );
+  // handleDelete 예시
+  const handleDelete = (filename: string) => {
+    setResults((prev) => prev.filter(r => !r.image_path.includes(filename)));
   };
 
-  // 로그인 UI
   if (!loggedIn) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-100">
@@ -82,12 +73,11 @@ function App() {
               <UploadForm />
             </section>
             <section className="flex-1 bg-white/90 rounded-2xl shadow-xl p-6 border border-orange-100">
-              {/* 검색폼 결과를 results에 저장 */}
               <SearchForm onResults={setResults} />
             </section>
           </div>
         )}
-        {/* 실제 검색 결과 출력 */}
+        {/* 여기가 반드시 있어야 함 */}
         {!showGallery && <SearchResultList results={results} onDelete={handleDelete} />}
       </main>
       <footer className="text-center text-xs text-gray-400 mt-12">
