@@ -1,7 +1,7 @@
 import { useState } from "react";
 import UploadForm from "./components/UploadForm";
 import SearchForm from "./components/SearchForm";
-import SearchResultList from "./components/SearchResultList";
+
 import ImageGallery from "./components/ImageGallery";
 import AuthForm from "./components/AuthForm";
 
