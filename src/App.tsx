@@ -1,7 +1,7 @@
 import { useState } from "react";
 import UploadForm from "./components/UploadForm";
 import SearchForm from "./components/SearchForm";
-
+import SearchResultList from "./components/SearchResultList";
 import ImageGallery from "./components/ImageGallery";
 import AuthForm from "./components/AuthForm";
 
@@ -15,13 +15,25 @@ interface SearchResultGrouped {
   matches: Match[];
 }
 
-
 function App() {
   const [results, setResults] = useState<SearchResultGrouped[]>([]);
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access_token"));
   const [showGallery, setShowGallery] = useState(false);
 
-  // 로그인 상태 따라 AuthForm 또는 메인 UI
+  // 이미지 삭제 핸들러 (onDelete용)
+  const handleDelete = async (filename: string) => {
+    await fetch(`${import.meta.env.VITE_API_BASE}/delete_image/${filename}`, {
+      method: "DELETE",
+      headers: {
+        token: localStorage.getItem("access_token") || "",
+      },
+    });
+    setResults(prev =>
+      prev.filter(item => !item.image_path.includes(filename))
+    );
+  };
+
+  // 로그인 UI
   if (!loggedIn) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-100">
@@ -53,7 +65,9 @@ function App() {
       </header>
       <main className="max-w-5xl mx-auto px-4">
         <section className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-yellow-700 mb-2">사진으로 남기는 나만의 공부노트 <span>📷</span></h2>
+          <h2 className="text-3xl font-extrabold text-yellow-700 mb-2">
+            사진으로 남기는 나만의 공부노트 <span>📷</span>
+          </h2>
           <p className="text-lg text-gray-700 mb-4">
             <b className="text-blue-700">이미지로 기록</b>한 공부 내용을
             <b className="text-orange-600"> AI가 자동으로 텍스트로 추출</b>하고
@@ -68,11 +82,13 @@ function App() {
               <UploadForm />
             </section>
             <section className="flex-1 bg-white/90 rounded-2xl shadow-xl p-6 border border-orange-100">
+              {/* 검색폼 결과를 results에 저장 */}
               <SearchForm onResults={setResults} />
             </section>
           </div>
         )}
-        <SearchForm onResults={(data: SearchResultGrouped[]) => setResults(data)} />
+        {/* 실제 검색 결과 출력 */}
+        {!showGallery && <SearchResultList results={results} onDelete={handleDelete} />}
       </main>
       <footer className="text-center text-xs text-gray-400 mt-12">
         © 2025 내 공부 아카이브 | Made with <span className="text-red-400">♥</span>
