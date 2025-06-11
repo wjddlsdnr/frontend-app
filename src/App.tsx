@@ -3,6 +3,7 @@ import UploadForm from "./components/UploadForm";
 import SearchForm from "./components/SearchForm";
 import SearchResultList from "./components/SearchResultList";
 import ImageGallery from "./components/ImageGallery";
+import AuthForm from "./components/AuthForm";
 
 interface Match {
   highlighted: string;
@@ -14,71 +15,64 @@ interface SearchResultGrouped {
   matches: Match[];
 }
 
+
 function App() {
   const [results, setResults] = useState<SearchResultGrouped[]>([]);
+  const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access_token"));
   const [showGallery, setShowGallery] = useState(false);
 
-  const handleSearchResults = (data: any) => {
-    setResults(Array.isArray(data) ? data : []);
-  };
-
-  const handleDelete = async (filename: string) => {
-    // 토큰 등 인증 헤더 필요시 수정!
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE}/delete_image/${filename}`,
-      { method: "DELETE" }
+  // 로그인 상태 따라 AuthForm 또는 메인 UI
+  if (!loggedIn) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-100">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 min-w-[320px]">
+          <AuthForm onLogin={() => setLoggedIn(true)} />
+        </div>
+      </div>
     );
-    if (res.ok) {
-      setResults((prev) => prev.filter((r: any) => !r.image_path.includes(filename)));
-    }
-  };
+  }
 
   return (
-    <div className="min-h-screen pb-12" style={{background: "none"}}>
-      {/* 헤더 + 네비 */}
-      <header className="bg-white/90 shadow-xl px-6 py-8 flex justify-between items-center border-b border-orange-100">
-        <span className="font-extrabold text-3xl text-orange-400 tracking-widest drop-shadow-sm font-serif">
-          ✍️ Study Journal
-        </span>
-        <nav className="space-x-6 flex items-center">
-          <a href="#" className="text-gray-500 hover:text-orange-400 font-semibold transition">소개</a>
-          <a href="#" className="text-gray-500 hover:text-orange-400 font-semibold transition">문의</a>
-          <button
-            className="bg-orange-400 hover:bg-orange-500 text-white rounded-full px-6 py-2 font-bold shadow transition"
-            onClick={() => setShowGallery((prev) => !prev)}
-          >
-            {showGallery ? "홈으로" : "내 사진 보기"}
-          </button>
-        </nav>
+    <div className="min-h-screen pb-12 bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-100 bg-[url('/notebook-paper.svg')] bg-cover">
+      <header className="bg-white/90 shadow-lg py-6 mb-8 sticky top-0 z-20 border-b">
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-4xl">📔</span>
+            <span className="text-2xl font-bold text-yellow-600 drop-shadow">Study Journal</span>
+          </div>
+          <nav className="space-x-6 flex items-center">
+            <a href="#" className="text-blue-500 hover:underline font-medium">소개/문의</a>
+            <button
+              onClick={() => setShowGallery((prev) => !prev)}
+              className="ml-2 bg-orange-400 hover:bg-orange-500 text-white rounded-full px-4 py-1 font-medium shadow transition"
+            >
+              {showGallery ? "홈으로" : "내 사진 보기"}
+            </button>
+          </nav>
+        </div>
       </header>
-
-      {!showGallery && (
-        <section className="max-w-4xl mx-auto text-center mb-8 px-4">
-          <h2 className="text-3xl font-extrabold text-orange-500 mb-2 font-serif">사진으로 남기는 나만의 공부노트 📸</h2>
-          <p className="text-lg text-gray-600 mb-4">
-            <b className="text-orange-600">이미지로 기록</b>한 공부 내용을  
-            <b className="text-orange-500"> AI가 자동으로 텍스트로 추출</b>하고  
-            <b className="text-orange-600"> 원하는 키워드나 문장</b>으로 바로 찾아볼 수 있어요!
+      <main className="max-w-5xl mx-auto px-4">
+        <section className="text-center mb-8">
+          <h2 className="text-3xl font-extrabold text-yellow-700 mb-2">사진으로 남기는 나만의 공부노트 <span>📷</span></h2>
+          <p className="text-lg text-gray-700 mb-4">
+            <b className="text-blue-700">이미지로 기록</b>한 공부 내용을
+            <b className="text-orange-600"> AI가 자동으로 텍스트로 추출</b>하고
+            <b className="text-blue-700"> 원하는 키워드나 문장</b>으로 바로 찾아볼 수 있어요!
           </p>
         </section>
-      )}
-
-      <main className="max-w-4xl mx-auto px-4">
         {showGallery ? (
           <ImageGallery />
         ) : (
-          <>
-            <div className="flex flex-col md:flex-row gap-8 mb-8">
-              <section className="flex-1 bg-white/80 rounded-2xl shadow-xl p-6 border border-orange-100">
-                <UploadForm />
-              </section>
-              <section className="flex-1 bg-white/80 rounded-2xl shadow-xl p-6 border border-orange-100">
-                <SearchForm onResults={handleSearchResults} />
-              </section>
-            </div>
-            <SearchResultList results={results} onDelete={handleDelete} />
-          </>
+          <div className="flex flex-col md:flex-row gap-8 mb-8">
+            <section className="flex-1 bg-white/90 rounded-2xl shadow-xl p-6 border border-yellow-100">
+              <UploadForm />
+            </section>
+            <section className="flex-1 bg-white/90 rounded-2xl shadow-xl p-6 border border-orange-100">
+              <SearchForm onResults={setResults} />
+            </section>
+          </div>
         )}
+        <SearchForm onResults={(data: SearchResultGrouped[]) => setResults(data)} />
       </main>
       <footer className="text-center text-xs text-gray-400 mt-12">
         © 2025 내 공부 아카이브 | Made with <span className="text-red-400">♥</span>
