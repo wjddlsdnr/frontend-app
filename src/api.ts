@@ -22,13 +22,11 @@ export const searchSentences = async (query: string) => {
 };
 
 
-export const deleteImage = async (filename: string) => {
-  const token = localStorage.getItem("access_token");
-  return fetch(`${API_BASE}/delete_image/${filename}`, {
+export const deleteImage = (filename: string, token?: string) =>
+  fetch(`${API_BASE}/delete_image/${filename}`, {
     method: "DELETE",
-    headers: { "token": token || "" },
+    headers: { token: token || "" },
   });
-};
 
 
 export const fetchHighlightedImage = async (image_path: string, query: string) => {
@@ -43,3 +41,10 @@ export const fetchHighlightedImage = async (image_path: string, query: string) =
   });
   return res.blob();
 };
+
+
+
+export const fetchMyImages = (token?: string) =>
+  fetch(`${API_BASE}/my_images/`, {
+    headers: { token: token || "" },
+  }).then(res => res.json());
