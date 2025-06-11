@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ImageModal from "./ImageModal";
-import { deleteImage, fetchHighlightedImage } from "../api";
+import { fetchHighlightedImage } from "../api";  // 여기서 deleteImage 제거
+
 
 interface Match {
   highlighted: string;
